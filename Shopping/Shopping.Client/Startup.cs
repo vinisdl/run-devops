@@ -12,6 +12,13 @@ namespace Shopping.Client
 {
     public class Startup
     {
+        public const string TraceId = "X-B3-TraceId";
+        public const string SpanId = "X-B3-SpanId";
+        public const string ParentSpanId = "X-B3-ParentSpanId";
+        public const string Sampled = "X-B3-Sampled"; // Will be replaced by Flags in the future releases of Finagle
+        public const string Flags = "X-B3-Flags";
+        public const string B3 = "b3";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -26,6 +33,18 @@ namespace Shopping.Client
             {
                 //client.BaseAddress = new Uri("http://localhost:5000/"); // Shopping.API url     
                 client.BaseAddress = new Uri(Configuration["ShoppingAPIUrl"]);
+            }).AddHeaderPropagation();
+
+
+            services.AddHeaderPropagation(o =>
+            {
+                // Propagate if header exists
+                o.Headers.Add(TraceId);
+                o.Headers.Add(SpanId);
+                o.Headers.Add(ParentSpanId);
+                o.Headers.Add(Sampled);
+                o.Headers.Add(Flags);
+                o.Headers.Add(B3);
             });
 
             services.AddControllersWithViews();
@@ -42,6 +61,8 @@ namespace Shopping.Client
             {
                 app.UseExceptionHandler("/Home/Error");
             }
+
+            app.UseHeaderPropagation();
             app.UseStaticFiles();
 
             app.UseRouting();

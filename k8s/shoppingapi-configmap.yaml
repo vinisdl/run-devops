@@ -3,4 +3,4 @@ kind: ConfigMap
 metadata:
   name: shoppingapi-configmap
 data:
-  shoppingapi_url: http://shoppingapi-service:8000
+  shoppingapi_url: http://shoppingapi-service.lab.svc.cluster.local:8000

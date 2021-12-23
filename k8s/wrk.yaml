@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wrk-service
+  namespace: lab
+spec:
+  ports:
+    - name: wrk
+      protocol: TCP
+      port: 80
+      targetPort: 80
+  selector:
+    app: wrk
+  type: ClusterIP

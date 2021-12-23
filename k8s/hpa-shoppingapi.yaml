@@ -1,0 +1,29 @@
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: shoppingapi
+  namespace: lab
+  labels:
+    app: shoppingapi
+spec:
+  scaleTargetRef:
+    kind: Deployment
+    name: shoppingapi-deployment
+    apiVersion: apps/v1
+  minReplicas: 1
+  maxReplicas: 5
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 120
+  metrics:
+    - type: Object
+      object:
+        metric:
+          name: envoy_service_response_time
+        describedObject:
+          kind: Service
+          name: shoppingapi-lab
+          apiVersion: v1
+        target:
+          type: Value
+          value: "300m" # 1000m is 1s

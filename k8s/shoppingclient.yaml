@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: shoppingclient-deployment
+  namespace: lab
   labels:
     app: shoppingclient
 spec:
@@ -13,6 +14,13 @@ spec:
     metadata:
       labels:
         app: shoppingclient
+      annotations:
+        consul.hashicorp.com/connect-inject: "true"
+        consul.hashicorp.com/connect-service: shoppingclient-lab
+        consul.hashicorp.com/service-tags: "\
+          traefik.enable=true,\
+          traefik.http.routers.shoppingclient-lab.entrypoints=websecure,\
+          traefik.http.routers.shoppingclient-lab.rule=Host(`shoppingclient-lab.mypath.com`) && PathPrefix(`/`)"
     spec:
       containers:
         - name: shoppingclient
@@ -25,27 +33,27 @@ spec:
               value: Development
             - name: ShoppingAPIUrl
               valueFrom:
-                  configMapKeyRef:
-                    name: shoppingapi-configmap
-                    key: shoppingapi_url
+                configMapKeyRef:
+                  name: shoppingapi-configmap
+                  key: shoppingapi_url
           resources:
             requests:
               memory: "64Mi"
               cpu: "250m"
             limits:
-              memory: "128Mi"
+              memory: "512Mi"
               cpu: "500m"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: shoppingclient-service
+  namespace: lab
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: shoppingclient
   ports:
     - protocol: TCP
       port: 8001
       targetPort: 80
-      nodePort: 30000

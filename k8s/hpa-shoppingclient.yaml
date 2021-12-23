@@ -1,0 +1,30 @@
+kind: HorizontalPodAutoscaler
+apiVersion: autoscaling/v2beta2
+metadata:
+  name: shoppingclient
+  namespace: lab
+  labels:
+    app: shoppingclient
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: shoppingclient-deployment
+  minReplicas: 1
+  maxReplicas: 3
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 120
+  metrics:
+    - type: Object
+      object:
+        metric:
+          name: traefik_service_response_time
+        describedObject:
+          apiVersion: v1
+          kind: Service
+          name: shoppingclient-lab@consulcatalog
+        target:
+          type: Value
+          value: "300m" # 1000m is 1s
+
